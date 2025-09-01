@@ -6,7 +6,25 @@ excerpt: 重新系统性地学一下c++
 
 ## C++ note
 
-[^参考书]: 《C++语言程序设计（第5版）》 郑莉 董渊
+参考书：《C++语言程序设计（第5版）》 郑莉 董渊
+
+### Chapter 2
+
+#### type definition
+
+```cpp
+typedef double Area,Volumn;
+// using Area=double;
+// using Volumn=double;
+using arr=int[10];
+
+int main()
+{
+    return 0;
+}
+```
+
+
 
 ### chapter 3
 
@@ -203,9 +221,6 @@ double max(double a,double b)
 #### 4.2 类和对象 & 4.3 构造函数、析构函数
 
 ```cpp
-#include<cstdio>
-using namespace std;
-
 class Clock
 {
     public://公有类型 外部接口
@@ -274,10 +289,6 @@ int main()
 
 
 ```cpp
-#include<cstdio>
-#include<iostream>
-using namespace std;
-
 class Point 
 {
     public:
@@ -406,10 +417,6 @@ class Mystr
 #### struct、union、enum
 
 ```cpp
-#include<cstdio>
-#include<iostream>
-using namespace std;
-
 class ExamInfo
 {
     public:
@@ -488,10 +495,6 @@ int main()
 结构体与类的唯一区别在于访问权限，因此也允许定义位域；但联合体中，各个成员本身就共用相同的内存单元，因此没必要也不允许定义位域。
 
 ```cpp
-#include<cstdio>
-#include<iostream>
-using namespace std;
-
 enum Level{FRESHMAN,SOPHOMORE,JUNIOR,SENIOR};
 enum Grade{A,B,C,D};
 
@@ -558,10 +561,6 @@ int main()
 
 
 ```cpp
-#include<cstdio>
-#include<iostream>
-using namespace std;
-
 class Point
 {
     public:
@@ -628,11 +627,6 @@ int main()
 #### 类的友元（Friend of Class）
 
 ```cpp
-#include<cstdio>
-#include<iostream>
-#include<cmath>
-using namespace std;
-
 /*
 friend function
 */
@@ -700,4 +694,291 @@ int main()
 ```
 
 
+
+#### mutable
+
+​	对于常成员函数，如果我们想让其能够改变某些数据成员的值，这需要用到一个新的关键字——`mutable`。对于这类数据成员，可以使用 `mutable`关键字加以修饰，这样，即使在常成员函数中，也可以修改它们的值。上面的类可以改写成下面的形式：
+
+```cpp
+class Line	//Line类的定义
+{
+	public: //外部接口
+		Line(const Point &pl, const Point &p2):pl(pl),p2(p2),len(-1){}
+		double getLen() const;
+    
+	private: //私有数据成员
+		Point pl, p2; //Point类的对象p1,p2
+		mutable double len;
+};
+
+double line::getLen() const 
+{
+	if(len<0)
+    {
+		double x=p1.getX()-p2.getX();
+		double y=p1.getY()-p2.getY();
+		len=sqrt(x*x+y*y);
+	}
+	return len;
+}
+```
+
+使用了 `mutable` 关键字后，就可以将 `getLen` 函数声明为常成员函数了。
+
+
+
+### Chapter 6
+
+#### 指针
+
+---
+
+**tips**:
+
+- 可以声明指向常量的指针，此时不能通过指针来改变所指对象的值，但指针本身可以改变，可以指向另外的对象。
+
+  ```cpp
+  int a;
+  const int *pl=&a;	//p1是指向常量的指针
+  int b;
+  p1=&b;				//正确，p1本身的值可以改变
+  *pl=1;				//编译时出错，不能通过p1改变所指的对象
+  ```
+
+- 可以声明指针类型的常量，这时指针本身的值不能被改变。
+
+  ```cpp
+  int*const p2=&a;
+  p2=&b; 				//错误，p2是指针常量，值不能改变
+  ```
+
+- 一般情况下，指针的值只能赋给相同类型的指针。但是有一种特殊的 void 类型指针，可以存储任何类型的对象地址，就是说任何类型的指针都可以赋值给 void类型的指针变量。经过使用类型显式转换，通过 void类型的指针便可以访问任何类型的数据。
+
+  ```cpp
+  int main()
+  {
+  //!	void voidobject; 错，不能声明 void类型的变量
+  	void *pv;	//对，可以声明 void类型的指针
+  	int i=5;
+  	pv=&i; 		//void类型指针指向整型变量
+  	int *pint=static_cast<int*>(pv); //void类型指针赋值给 int类型指针
+  	cout<<"*pint="<<*pint<<endl;
+  	return 0;
+  }
+  ```
+  
+- `int *p[3]` 和 `int (*p)[3]` 的区别
+
+  优先级的区别， `[]` 的优先级高于 `*` 。
+
+  `int *p[3]` 表示包含三个整型指针的数组，`int (*p)[3] ` 表示一个指向包含三个整数的数组的指针。
+
+  ```cpp
+  int a = 1, b = 2, c = 3;
+  int *p[3] = {&a, &b, &c};  // 包含3个指针的数组
+  cout << *p[0] << endl;  // 输出 1
+  cout << *p[1] << endl;  // 输出 2
+  
+  
+  int arr[3] = {1, 2, 3};
+  int (*p)[3] = &arr;  // 指向整个数组的指针
+  cout << (*p)[0] << endl;  // 输出 1
+  cout << (*p)[1] << endl;  // 输出 2
+  ```
+
+  
+
+---
+
+##### 函数返回数组指针
+
+1. 使用type definition
+
+   ```cpp
+   typedef int arr[10];
+   // using arr=int[10];
+   arr foo(int i);
+   ```
+
+2. 直接写
+
+   ```cpp
+   int (*foo(int i))[10];
+   ```
+
+3. 尾置返回类型
+
+   ```cpp
+   auto foo(int i)-> int (*)[10];
+   ```
+
+4. 使用 `decltype` 关键字
+
+   ```cpp
+   int a[]={0,1,2,3,4};
+   int b[]={5,6,7,8,9};
+   decltype(a) *func(int i)
+   {
+       return (i%2) ? &a : &b;
+   }
+   ```
+
+
+
+#####指向函数的指针
+
+​	在程序运行时，不仅数据要占据内存空间，执行程序的代码也被调入内存并占据一定的空间。每一个函数都有函数名，实际上这个函数名就表示函数的代码在内存中的起始地址。由此看来，调用函数的通常形式“函数名(参数表)”的实质就是“函数代码首地址(参数表)”。
+​	函数指针就是专门用来存放函数代码首地址的变量。在程序中可以像使用函数名一样使用指向函数的指针来调用函数。也就是说一旦函数指针指向了某个函数，它与函数名便具有同样的作用。函数名在表示函数代码起始地址的同时，也包括函数的返回值类型和参
+数的个数、类型、排列次序等信息。因此在通过函数名调用函数时，编译系统能够自动检查实参与形参是否相符，用函数的返回值参与其他运算时，能自动进行类型一致性检查。
+
+```cpp
+typedef int (*DoubleIntFunction)(double);
+
+int func(const double x)
+{
+    return static_cast<int>(x);
+}
+
+void print(const int *p,const int n)
+{
+    for(int i=0;i<n;i++)
+        printf("%d ",p[i]);
+    printf("\n");
+    return ;
+}
+
+int main()
+{
+    DoubleIntFunction funcPtr=func;
+    printf("func(3.14)=%d\n",funcPtr(3.14));
+
+    void (*funcPointer)(const int *,const int )=print;
+    int a[]={1,2,3,4,5};
+    funcPointer(a,5);
+    return 0;
+}
+```
+
+
+
+##### 对象指针
+
+1. 对象指针
+
+   ```cpp
+   /*
+   一般使用
+   */
+   Point *ptr=&a;
+   printf("%d %d\n",(*ptr).getX(),ptr->getY());
+   
+   /*
+   向前引用声明中的使用
+   */
+   class Fred;//向前引用声明
+   class Barney
+   {
+       Fred *x;
+   //!	Fred x;
+   };
+   class Fred
+   {
+     ...  
+   };
+   
+   ```
+
+   
+
+2. `this` 指针
+
+   **`this` 指针是一个隐含于每一个类的非静态成员函数中的特殊指针(包括构造函数和析构函数),它用于指向正在被成员函数操作的对象。**
+
+   ```cpp
+   void Point::change(const int x,const int y)
+   {
+       this->x=x;
+       this->y=y;
+       return ;
+   }
+   ```
+
+   
+
+3. 指向类的非静态成员的指针
+
+   `(对象名.*类成员指针名)(参数表)` 或 `(对象指针名->*类成员指针名)(参数表)` 。
+
+4. 指向类的静态成员的指针
+
+```cpp
+/*
+object pointer
+*/
+class Point;
+class Barney
+{
+    Point *x;
+//! Point x; 
+};
+
+class Point
+{
+    public:
+        Point(const int _x=0,const int _y=0):x(_x),y(_y) 
+        {
+            count++;
+        }
+        Point(const Point &p):x(p.x),y(p.y)
+        {
+            count++;
+        }
+        int getX()const {return x;}
+        int getY()const {return y;}
+        void change(const int x,const int y);
+        static void showCount()
+        {
+            printf("PointCount=%d",count);
+            return ;
+        }
+
+        static int count;
+
+    private:
+        int x,y;
+};
+
+/*
+this 指针
+*/
+void Point::change(const int x,const int y)
+{
+    this->x=x;
+    this->y=y;
+    return ;
+}
+
+int Point::count=0;
+
+int main()
+{
+    Point a(4,5);
+    Point *p1=&a;
+    int (Point::*funcPtrt)()const=&Point::getX;
+
+    cout<<(a.*funcPtrt)()<<endl;
+    cout<<(p1->*funcPtrt)()<<endl;
+    cout<<a.getX()<<endl;
+    cout<<p1->getX()<<endl;
+
+    /*
+    指针访问类的静态成员
+    */
+    int *ptr=&Point::count;
+    void (*fptr)()=Point::showCount;
+    printf("PointCount=%d\n",*ptr);
+    fptr();
+    return 0;
+}
+```
 

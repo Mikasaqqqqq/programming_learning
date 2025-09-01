@@ -39,7 +39,7 @@ class A
         }
 
         int getX() {return x;}
-        friend class B;// //B类是A类的友元类
+        friend class B; //B类是A类的友元类
 
     private:
         int x;
@@ -56,7 +56,7 @@ class B
 
 void B::set(int i)
 {
-    a.x=i; //由于B是A的友元，所以在B的成员函数中可以访问A类对象的私有成员
+    a.x=i;  //由于B是A的友元，所以在B的成员函数中可以访问A类对象的私有成员
     return ;
 }
 
